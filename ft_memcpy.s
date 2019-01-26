@@ -2,5 +2,7 @@
 	default rel
 	section .text
 _ft_memcpy:
-	mov rax, rdi
+	lea rax, [rdi]
+	mov rcx, rdx
+	rep movsb
 	ret
