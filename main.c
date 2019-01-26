@@ -44,7 +44,7 @@ int		main(int ac, char **av)
 	ft_bzero(b, buf);
 	for (int i = 0; i < buf; i++)
 		printf("%-3.2hhx", b[i]);
-	printf("\n%lu\n", ft_strlen(av[1]));
+	printf("\nstrlen %lu\n", ft_strlen(av[1]));
 	c = av[1][0];
 	printf("isalpha %d\n", ft_isalpha(c));
 	printf("isdigit %d\n", ft_isdigit(c));
@@ -73,7 +73,9 @@ int		main(int ac, char **av)
 	dprintf(1, "puts ");
 	c = ft_puts(av[1]);
 	printf("\nputs ret %d\n", c);
+# ifdef CAT
 	int fd2 = open("./main.c", O_RDONLY);
 	ft_cat(fd2);
-#endif
+# endif /* endif CAT*/
+#endif /* endif __MACH__ */
 }
