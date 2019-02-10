@@ -16,6 +16,8 @@ _ft_strdup:
 	cmp rax, 0					;malloc == NULL?
 	jz END						;if NULL return NULL
 	mov rdi, rax				;put malloc ret in rdi
+	mov rsi, [rsp + 16]
+	mov rdx, [rsp + 8]
 	call _ft_memcpy
 END:
 	add rsp, 24
