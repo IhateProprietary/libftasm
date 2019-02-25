@@ -43,7 +43,7 @@ int		main(int ac, char **av)
 	char t[buf];
 	int c;
 
-	memset(b, 'c', buf);
+	ft_memset(b, 'c', buf);
 	for (int i = 0; i < buf; i++)
 		printf("%-3.2hhx", b[i]);
 	printf("\n");

@@ -1,12 +1,11 @@
 	extern _malloc
 	extern _ft_strlen
-	extern _ft_memcpy
 	global _ft_strdup
 	default rel
 	section .text
 _ft_strdup:
-	call _ft_strlen
 	push rdi 					;rdi const char*
+	call _ft_strlen
 	add rax, 1					;rdi == rax + 1
 	mov rdi, rax
 	push rax					;save size
@@ -17,8 +16,8 @@ _ft_strdup:
 	jz END						;if NULL return NULL
 	mov rdi, rax				;put malloc ret in rdi
 	mov rsi, [rsp + 16]
-	mov rdx, [rsp + 8]
-	call _ft_memcpy
+	mov rcx, [rsp + 8]
+	rep movsb
 END:
 	add rsp, 24
 	ret
