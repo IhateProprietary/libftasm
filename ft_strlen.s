@@ -6,8 +6,9 @@ _ft_strlen:
 	xor rcx, rcx
 	cld
 	not rcx
+	mov rsi, rdi
 	repne scasb
-	mov rax, rcx
-	not rax
+	mov rax, rdi
+	sub rax, rsi
 	dec rax
 	ret
