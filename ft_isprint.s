@@ -2,6 +2,8 @@
 	default rel
 	section .text
 _ft_isprint:
+	push rbp
+	lea rbp, [rsp]
 	cmp edi, 0x19
 	jle E2
 	cmp edi, 0x7f
@@ -11,5 +13,6 @@ E1:
 	jmp END
 E2:	
 	mov eax, 0
-END:	
+END:
+	pop rbp
 	ret 

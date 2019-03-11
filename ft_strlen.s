@@ -2,6 +2,8 @@
 	default rel
 	section .text
 _ft_strlen:
+	push rbp
+	lea rbp, [rsp]
 	xor rax, rax
 	xor rcx, rcx
 	cld
@@ -11,4 +13,5 @@ _ft_strlen:
 	mov rax, rdi
 	sub rax, rsi
 	dec rax
+	pop rbp
 	ret

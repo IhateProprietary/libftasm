@@ -2,9 +2,11 @@
 	default rel
 	section .text
 _ft_strcmp:
+	push rbp
+	lea rbp, [rsp]
 L1:
 	mov cl, [rdi]
-	cmp cl, 0
+	test cl, cl
 	jz F1
 	cmp cl, [rsi]
 	jne F1
@@ -16,4 +18,5 @@ F1:
 	movzx ecx, byte [rsi]
 	sub eax, ecx
 END:
+	pop rbp
 	ret

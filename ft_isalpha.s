@@ -2,6 +2,9 @@
 	default rel
 	section .text
 _ft_isalpha:
+	push rbp
+	lea rbp, [rsp]
+
 	cmp edi, 0x40
 	jle L2
 L1:
@@ -19,4 +22,5 @@ E1:
 E2:
 	mov eax, 0
 END:
+	pop rbp
 	ret

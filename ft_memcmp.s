@@ -2,9 +2,11 @@
 	default rel
 	section .text
 _ft_memcmp:
+	push rbp
+	lea rbp, [rsp]
 	xor rax, rax
 L1:
-	cmp rdx, 0
+	test rdx, rdx
 	jz END
 	mov cl, [rdi]
 	cmp cl, [rsi]
@@ -18,4 +20,5 @@ F1:
 	movzx ecx, byte [rsi]
 	sub eax, ecx
 END:
+	pop rbp
 	ret

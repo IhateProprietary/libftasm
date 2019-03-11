@@ -50,7 +50,7 @@ int		main(int ac, char **av)
 	ft_bzero(b, buf);
 	for (int i = 0; i < buf; i++)
 		printf("%-3.2hhx", b[i]);
-	printf("\nstrlen %lu\n", ft_strlen(av[1]));
+	printf("\nstrlen %lu %lu\n", ft_strlen(av[1]), strlen(av[1]));
 	c = av[1][0];
 	printf("isalpha %d\n", ft_isalpha(c));
 	printf("isdigit %d\n", ft_isdigit(c));
@@ -69,12 +69,12 @@ int		main(int ac, char **av)
 	c %= buf;
 	printf("%d %d %d\n", ca, cb, c);
 	printf("memchr me %p him %p\n", ft_memchr(b, cb[b], ca), memchr(b, cb[b], ca));
-	b[buf - 1] = 0;
-	printf("strchr me %p him %p\n", ft_strchr(b, b[c]), strchr(b, b[c]));
 	ft_memcpy(t, b, buf);
 	for (int i = 0; i < buf; i++)
 		printf("%-3.2hhx", t[i]);
-	printf("\nmemcpy dif %d\n", memcmp(t, b, buf));
+	b[buf - 1] = 0;
+	printf("\nstrchr me %p him %p\n", ft_strchr(b, b[c]), strchr(b, b[c]));
+	printf("memcpy dif %d\n", memcmp(t, b, buf));
 	printf("memcmp  %d %d, should no dif\n", ft_memcmp(t, b, buf), memcmp(t, b, buf));
 	read(fd, t, buf);
 	printf("memcmp dif %d %d\n", ft_memcmp(t, b, buf), memcmp(t, b, buf));

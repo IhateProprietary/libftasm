@@ -2,6 +2,8 @@
 	default rel
 	section .text
 _ft_isdigit:
+	push rbp
+	lea rbp, [rsp]
 	cmp edi, 0x29
 	jle E2
 L1:
@@ -13,4 +15,5 @@ E1:
 E2:
 	mov eax, 0
 END:
+	pop rbp
 	ret
