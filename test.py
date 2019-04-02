@@ -3,11 +3,12 @@
 import os
 import random
 from enum import Enum
+import sys
+import getopt
 
 DEVRANDOM = "/dev/urandom"
 
 class CTYPE(Enum):
-    NONE = 0x0
     VOID = "void"
     CHAR = "char"
     SHORT = "short"
@@ -17,15 +18,14 @@ class CTYPE(Enum):
     SIZE_T = "size_t"
 
 class DEF(Enum):
-    NONE = 0x0
     MEMORY = "-D__MEMORY__"
     STRING = "-D__STRING__"
     RETURN = "-D__RETURN__"
-    POINTER = "-D__PTR__"
+    PTR = "-D__PTR__"
     ORIGINAL = "-D__ORIGINAL__"
 
 class ARGV(Enum):
-    DST = "{}"
+    DST = "{dst}"
     SRC = "src"
     SIZE = "bufsize"
     FD_READ = "0"
@@ -46,131 +46,130 @@ FUNCTION = {
     #     "argv": [
     #         [CTYPE.INT, ARGV.FD_READ, 0]
     #     ],
-    #     "cdefines": None
+    #     "cdefines": []
     # },
-    # "isalnum": {
-    #     "type": [CTYPE.INT, 0],
-    #     "argv": [
-    #         [CTYPE.INT, ARGV.INT_TEST, 0],
-    #     ],
-    #     "cdefines": DEF.RETURN | DEF.ORIGINAL
-    # },
-    # "isalpha": {
-    #     "type": [CTYPE.INT, 0],
-    #     "argv": [
-    #         [CTYPE.INT, ARGV.INT_TEST, 0],
-    #     ],
-    #     "cdefines": DEF.RETURN | DEF.ORIGINAL
-    # },
-    # "isascii": {
-    #     "type": [CTYPE.INT, 0],
-    #     "argv": [
-    #         [CTYPE.INT, ARGV.INT_TEST, 0],
-    #     ],
-    #     "cdefines": DEF.RETURN | DEF.ORIGINAL
-    # },
-    # "isdigit": {
-    #     "type": [CTYPE.INT, 0],
-    #     "argv": [
-    #         [CTYPE.INT, ARGV.INT_TEST, 0],
-    #     ],
-    #     "cdefines": DEF.RETURN | DEF.ORIGINAL
-    # },
-    # "isprint": {
-    #     "type": [CTYPE.INT, 0],
-    #     "argv": [
-    #         [CTYPE.INT, ARGV.INT_TEST, 0],
-    #     ],
-    #     "cdefines": DEF.RETURN | DEF.ORIGINAL
-    # },
-    # "memchr": {
-    #     "type": [CTYPE.VOID, 1],
-    #     "argv": [
-    #         [CTYPE.VOID, ARGV.SRC, 1],
-    #         [CTYPE.VOID, ARGV.INT_TEST, 0],
-    #         [CTYPE.SIZE_T, ARGV.SIZE, 0]
-    #     ],
-    #     "cdefines": DEF.RETURN | DEF.ORIGINAL
-    # },
-    # "memcmp": {
-    #     "type": [CTYPE.VOID, 1],
-    #     "argv": [
-    #         [CTYPE.VOID, ARGV.DST, 1],
-    #         [CTYPE.VOID, ARGV.SRC, 1],
-    #         [CTYPE.SIZE_T, ARGV.SIZE, 0]
-    #     ],
-    #     "cdefines": DEF.RETURN | DEF.ORIGINAL
-    # },
-    # "memcpy": {
-    #     "type": [CTYPE.VOID, 1],
-    #     "argv": [
-    #         [CTYPE.VOID, ARGV.DST, 1],
-    #         [CTYPE.VOID, ARGV.SRC, 1],
-    #         [CTYPE.SIZE_T, ARGV.SIZE, 0]
-    #     ],
-    #     "cdefines": DEF.RETURN | DEF.PTR | DEF.MEMORY | DEF.ORIGINAL
-    # },
-    # "memset": {
-    #     "type": [CTYPE.VOID, 1],
-    #     "argv": [
-    #         [CTYPE.VOID, ARGV.SRC, 1],
-    #         [CTYPE.VOID, ARGV.INT_SET, 0],
-    #         [CTYPE.SIZE_T, ARGV.SIZE, 0]
-    #     ],
-    #     "cdefines": DEF.RETURN | DEF.ORIGINAL
-    # },
-    # "puts": {
-    #     "type": [CTYPE.INT, 0],
-    #     "argv": [
-    #         [CTYPE.CHAR, ARGV.SRC, 1]
-    #     ],
-    #     "cdefines": DEF.RETURN | DEF.ORIGINAL
-    # },
-    # "strchr": {
-    #     "type": [CTYPE.CHAR, 1],
-    #     "argv": [
-    #         [CTYPE.CHAR, ARGV.SRC, 1],
-    #         [CTYPE.INT, ARGV.INT_TEST, 0]
-    #     ],
-    #     "cdefines": DEF.RETURN | DEF.ORIGINAL
-    # },
-    # "strcmp": {
-    #     "type": [CTYPE.INT, 0],
-    #     "argv": [
-    #         [CTYPE.CHAR, ARGV.DST, 1],
-    #         [CTYPE.CHAR, ARGV.SRC, 1]
-    #     ],
-    #     "cdefines": DEF.RETURN | DEF.ORIGINAL
-    # },
-    # "strdup": {
-    #     "type": [CTYPE.CHAR, 1],
-    #     "argv": [
-    #         [CTYPE.CHAR, ARGV.DST, 1],
-    #         [CTYPE.CHAR, ARGV.SRC, 1]
-    #     ],
-    #     "cdefines": DEF.RETURN | DEF.ORIGINAL
-    # },
-    # "strlen": {
-    #     "type": [CTYPE.SIZE_T, 0],
-    #     "argv": [
-    #         [CTYPE.CHAR, ARGV.SRC, 1],
-    #     ],
-    #     "cdefines": DEF.RETURN | DEF.ORIGINAL
-    # },
-    # "tolower": {
-    #     "type": [CTYPE.INT, 0],
-    #     "argv": [
-    #         [CTYPE.CHAR, ARGV.INT_TEST, 0]
-    #     ],
-    #     "cdefines": DEF.RETURN | DEF.ORIGINAL
-    # },
-    # "toupper": {
-    #     "type": [CTYPE.INT, 0],
-    #     "argv": [
-    #         [CTYPE.CHAR, ARGV.INT_TEST, 0]
-    #     ],
-    #     "cdefines": DEF.RETURN | DEF.ORIGINAL
-    # }
+    "isalnum": {
+        "type": [CTYPE.INT, 0],
+        "argv": [
+            [CTYPE.INT, ARGV.INT, 0],
+        ],
+        "cdefines": [DEF.RETURN, DEF.ORIGINAL]
+    },
+    "isalpha": {
+        "type": [CTYPE.INT, 0],
+        "argv": [
+            [CTYPE.INT, ARGV.INT, 0],
+        ],
+        "cdefines": [DEF.RETURN, DEF.ORIGINAL]
+    },
+    "isascii": {
+        "type": [CTYPE.INT, 0],
+        "argv": [
+            [CTYPE.INT, ARGV.INT, 0],
+        ],
+        "cdefines": [DEF.RETURN, DEF.ORIGINAL]
+    },
+    "isdigit": {
+        "type": [CTYPE.INT, 0],
+        "argv": [
+            [CTYPE.INT, ARGV.INT, 0],
+        ],
+        "cdefines": [DEF.RETURN, DEF.ORIGINAL]
+    },
+    "isprint": {
+        "type": [CTYPE.INT, 0],
+        "argv": [
+            [CTYPE.INT, ARGV.INT, 0],
+        ],
+        "cdefines": [DEF.RETURN, DEF.ORIGINAL]
+    },
+    "memchr": {
+        "type": [CTYPE.VOID, 1],
+        "argv": [
+            [CTYPE.VOID, ARGV.SRC, 1],
+            [CTYPE.INT, ARGV.INT, 0],
+            [CTYPE.SIZE_T, ARGV.SIZE, 0]
+        ],
+        "cdefines": [DEF.RETURN, DEF.ORIGINAL]
+    },
+    "memcmp": {
+        "type": [CTYPE.INT, 0],
+        "argv": [
+            [CTYPE.VOID, ARGV.DST, 1],
+            [CTYPE.VOID, ARGV.SRC, 1],
+            [CTYPE.SIZE_T, ARGV.SIZE, 0]
+        ],
+        "cdefines": [DEF.RETURN, DEF.ORIGINAL]
+    },
+    "memcpy": {
+        "type": [CTYPE.VOID, 1],
+        "argv": [
+            [CTYPE.VOID, ARGV.DST, 1],
+            [CTYPE.VOID, ARGV.SRC, 1],
+            [CTYPE.SIZE_T, ARGV.SIZE, 0]
+        ],
+        "cdefines": [DEF.PTR, DEF.MEMORY, DEF.ORIGINAL]
+    },
+    "memset": {
+        "type": [CTYPE.VOID, 1],
+        "argv": [
+            [CTYPE.VOID, ARGV.SRC, 1],
+            [CTYPE.INT, ARGV.INT, 0],
+            [CTYPE.SIZE_T, ARGV.SIZE, 0]
+        ],
+        "cdefines": [DEF.MEMORY, DEF.ORIGINAL]
+    },
+    "puts": {
+        "type": [CTYPE.INT, 0],
+        "argv": [
+            [CTYPE.CHAR, ARGV.SRC, 1]
+        ],
+        "cdefines": [DEF.RETURN, DEF.ORIGINAL]
+    },
+    "strchr": {
+        "type": [CTYPE.CHAR, 1],
+        "argv": [
+            [CTYPE.CHAR, ARGV.SRC, 1],
+            [CTYPE.INT, ARGV.INT, 0]
+        ],
+        "cdefines": [DEF.RETURN, DEF.ORIGINAL]
+    },
+    "strcmp": {
+        "type": [CTYPE.INT, 0],
+        "argv": [
+            [CTYPE.CHAR, ARGV.DST, 1],
+            [CTYPE.CHAR, ARGV.SRC, 1]
+        ],
+        "cdefines": [DEF.RETURN, DEF.ORIGINAL]
+    },
+    "strdup": {
+        "type": [CTYPE.CHAR, 1],
+        "argv": [
+            [CTYPE.CHAR, ARGV.SRC, 1]
+        ],
+        "cdefines": [DEF.STRING, DEF.PTR, DEF.ORIGINAL]
+    },
+    "strlen": {
+        "type": [CTYPE.SIZE_T, 0],
+        "argv": [
+            [CTYPE.CHAR, ARGV.SRC, 1],
+        ],
+        "cdefines": [DEF.RETURN, DEF.ORIGINAL]
+    },
+    "tolower": {
+        "type": [CTYPE.INT, 0],
+        "argv": [
+            [CTYPE.CHAR, ARGV.INT, 0]
+        ],
+        "cdefines": [DEF.RETURN, DEF.ORIGINAL]
+    },
+    "toupper": {
+        "type": [CTYPE.INT, 0],
+        "argv": [
+            [CTYPE.CHAR, ARGV.INT, 0]
+        ],
+        "cdefines": [DEF.RETURN, DEF.ORIGINAL]
+    }
 }
 
 TEMPLATE="""#include <stdio.h>
@@ -178,10 +177,9 @@ TEMPLATE="""#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <string.h>
+#include <ctype.h>
 #define ft_ ft_{func}
-
-#define __ARG {arg}
-#define __OARG {oarg}
 
 {_type} {ptr}ft_({argv});
 
@@ -193,7 +191,7 @@ int     main(int ac, char **av)
     char __cmp[] = "{buffer2}";
 #ifdef __STRING__
     __cmp[{rdm}] = 0;
-    __src[{rdm}] = 0;
+    src[{rdm}] = 0;
 #endif
 
     assert(__dst != (char *)0);
@@ -203,16 +201,16 @@ int     main(int ac, char **av)
 
     assert(__odst != (char *)0);
 # if defined(__RETURN__) || defined(__PTR__)
-    {_type} {ptr}oret = {func}(__OARG);
+    {_type} {ptr}oret = {func}({oarg});
 # else
-    {func}(__OARG);
+    {func}({oarg});
 # endif
 #endif
 
 #if defined(__RETURN__) || defined(__PTR__)
-    {_type} {ptr}ret = ft_(__ARG);
+    {_type} {ptr}ret = ft_({arg});
 #else
-    ft_(__ARG);
+    ft_({arg});
 #endif
 
 
@@ -248,23 +246,46 @@ def format_func_argument(_argv_type):
 
 if __name__ == "__main__":
     fd = os.open("/dev/urandom", os.O_RDONLY)
-    for key, value in FUNCTION.items():
-        argv = [
-            (format_func_prot(_type, _ptr),
-             format_func_argument(_argv_type))
-            for _type, _argv_type, _ptr in value["argv"]
-        ]
-        sizebuf = random.randrange(1, 16384+1, 8)
-        buf1 = "".join(["\\x{:02x}".format(x) for x in os.read(fd, sizebuf)])
-        buf2 = "".join(["\\x{:02x}".format(x) for x in os.read(fd, sizebuf)])
-        os.write(1, TEMPLATE.format(
-            func=key,
-            _type = value["type"][0].value,
-            ptr = value["type"][1] * "*",
-            argv=", ".join([x[0] for x in argv]),
-            arg=", ".join([x[1] for x in argv]).format("__dst"),
-            oarg=", ".join([x[1] for x in argv]).format("__odst"),
-            rdm = random.randrange(1, sizebuf, 8),
-            buffer1=buf1,
-            buffer2=buf2
-        ).encode("UTF-8"))
+    optlist, arg = getopt.gnu_getopt(sys.argv, "p:s:n:", longopts=["suffix=", "prefix=", "number=", "folder="])
+    folder = "./"
+    suffix = "_"
+    prefix = "test_"
+    n = 5
+    for opt, _arg in optlist:
+        if opt == "--suffix" or opt == "-s":
+            suffix = _arg
+        elif opt == "--prefix" or opt == "-p":
+            prefix = _arg
+        elif opt == "number" or opt == "-n":
+            n = int(_arg)
+        elif opt == "folder":
+            folder = _arg
+
+    for _ in range(0, n):
+        for key, value in FUNCTION.items():
+            argv = [
+                (format_func_prot(_type, _ptr),
+                 format_func_argument(_argv_type))
+                for _type, _argv_type, _ptr in value["argv"]
+            ]
+            sizebuf = random.randrange(0, 16384+1, 8)
+            buf1 = "".join(["\\x{:02x}".format(x) for x in os.read(fd, sizebuf)])
+            buf2 = "".join(["\\x{:02x}".format(x) for x in os.read(fd, sizebuf)])
+            filename = folder+prefix+key+suffix+str(_)
+            z = os.open(filename + ".c", os.O_TRUNC | os.O_CREAT | os.O_WRONLY, 0o644)
+            rchar=random.randrange(1, 127)
+            os.write(z, TEMPLATE.format(
+                func=key,
+                _type = value["type"][0].value,
+                ptr = value["type"][1] * "*",
+                argv=", ".join([x[0] for x in argv]),
+                arg=", ".join([x[1] for x in argv]).format(dst = "__dst", char = rchar),
+                oarg=", ".join([x[1] for x in argv]).format(dst = "__odst", char = rchar),
+                rdm = random.randrange(1, sizebuf, 8),
+                buffer1=buf1,
+                buffer2=buf2,
+            ).encode("UTF-8"))
+            os.close(z)
+            cmd = "gcc {filename}.c -o {filename} {DEFINES} -L. -lfts;./{filename}".format(filename=filename, DEFINES=" ".join([x.value for x in value["cdefines"]]))
+            print(cmd)
+            os.system(cmd)
