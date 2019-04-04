@@ -1,10 +1,12 @@
-#!/usr/bin/python3
+#!/Users/jye/.brew/bin/python3
 
 import os
 import random
 from enum import Enum
 import sys
 import getopt
+import subprocess
+import shlex
 
 DEVRANDOM = "/dev/urandom"
 
@@ -30,24 +32,17 @@ class ARGV(Enum):
     SIZE = "bufsize"
     FD_READ = "0"
     INT = "{char}"
-    CMP = "cmp"
+    CMP = "__cmp"
 
 FUNCTION = {
     "bzero": {
         "type": [CTYPE.VOID, 0],
         "argv": [
-            [CTYPE.VOID, ARGV.SRC, 1],
+            [CTYPE.VOID, ARGV.DST, 1],
             [CTYPE.SIZE_T, ARGV.SIZE, 0]
         ],
         "cdefines": [DEF.MEMORY, DEF.ORIGINAL]
     },
-    # "cat": {
-    #     "type": [CTYPE.VOID, 0],
-    #     "argv": [
-    #         [CTYPE.INT, ARGV.FD_READ, 0]
-    #     ],
-    #     "cdefines": []
-    # },
     "isalnum": {
         "type": [CTYPE.INT, 0],
         "argv": [
@@ -95,8 +90,8 @@ FUNCTION = {
     "memcmp": {
         "type": [CTYPE.INT, 0],
         "argv": [
-            [CTYPE.VOID, ARGV.DST, 1],
             [CTYPE.VOID, ARGV.SRC, 1],
+            [CTYPE.VOID, ARGV.CMP, 1],
             [CTYPE.SIZE_T, ARGV.SIZE, 0]
         ],
         "cdefines": [DEF.RETURN, DEF.ORIGINAL]
@@ -113,18 +108,11 @@ FUNCTION = {
     "memset": {
         "type": [CTYPE.VOID, 1],
         "argv": [
-            [CTYPE.VOID, ARGV.SRC, 1],
+            [CTYPE.VOID, ARGV.DST, 1],
             [CTYPE.INT, ARGV.INT, 0],
             [CTYPE.SIZE_T, ARGV.SIZE, 0]
         ],
         "cdefines": [DEF.MEMORY, DEF.ORIGINAL]
-    },
-    "puts": {
-        "type": [CTYPE.INT, 0],
-        "argv": [
-            [CTYPE.CHAR, ARGV.SRC, 1]
-        ],
-        "cdefines": [DEF.RETURN, DEF.ORIGINAL]
     },
     "strchr": {
         "type": [CTYPE.CHAR, 1],
@@ -137,8 +125,8 @@ FUNCTION = {
     "strcmp": {
         "type": [CTYPE.INT, 0],
         "argv": [
-            [CTYPE.CHAR, ARGV.DST, 1],
-            [CTYPE.CHAR, ARGV.SRC, 1]
+            [CTYPE.CHAR, ARGV.SRC, 1],
+            [CTYPE.CHAR, ARGV.CMP, 1]
         ],
         "cdefines": [DEF.RETURN, DEF.ORIGINAL]
     },
@@ -169,7 +157,23 @@ FUNCTION = {
             [CTYPE.CHAR, ARGV.INT, 0]
         ],
         "cdefines": [DEF.RETURN, DEF.ORIGINAL]
-    }
+    },
+    ### BELOW FUNCTION CANNOT BE TESTED AGAINST ORIGINAL
+    ### ONLY OUTPUT WILL BE TESTED
+    # "puts": {
+    #     "type": [CTYPE.INT, 0],
+    #     "argv": [
+    #         [CTYPE.CHAR, ARGV.SRC, 1]
+    #     ],
+    #     "cdefines": []
+    # },
+    # "cat": {
+    #     "type": [CTYPE.VOID, 0],
+    #     "argv": [
+    #         [CTYPE.INT, ARGV.FD_READ, 0]
+    #     ],
+    #     "cdefines": []
+    # },
 }
 
 TEMPLATE="""#include <stdio.h>
@@ -177,7 +181,7 @@ TEMPLATE="""#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <string.h>
+#include <fcntl.h>
 #include <ctype.h>
 #define ft_ ft_{func}
 
@@ -189,17 +193,21 @@ int     main(int ac, char **av)
     size_t bufsize = sizeof(src);
     char *__dst = malloc(bufsize);
     char __cmp[] = "{buffer2}";
+    int fd = open("/dev/urandom", O_RDONLY);
 #ifdef __STRING__
     __cmp[{rdm}] = 0;
     src[{rdm}] = 0;
 #endif
 
     assert(__dst != (char *)0);
+    assert(fd != -1);
+    read(fd, __dst, bufsize);
 
 #ifdef __ORIGINAL__
     char *__odst = malloc(bufsize);
 
     assert(__odst != (char *)0);
+    read(fd, __odst, bufsize);
 # if defined(__RETURN__) || defined(__PTR__)
     {_type} {ptr}oret = {func}({oarg});
 # else
@@ -286,6 +294,10 @@ if __name__ == "__main__":
                 buffer2=buf2,
             ).encode("UTF-8"))
             os.close(z)
-            cmd = "gcc {filename}.c -o {filename} {DEFINES} -L. -lfts;./{filename}".format(filename=filename, DEFINES=" ".join([x.value for x in value["cdefines"]]))
+            cmd = "gcc {filename}.c -o {filename} {DEFINES} -L. -lfts".format(filename=filename, DEFINES=" ".join([x.value for x in value["cdefines"]]))
             print(cmd)
-            os.system(cmd)
+            cmd = shlex.split(cmd)
+            subprocess.run(cmd)
+            _ret = subprocess.run(filename, capture_output=True)
+            print(_ret.stdout, _ret.stderr, sep='\n')
+                

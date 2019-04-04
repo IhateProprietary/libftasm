@@ -4,7 +4,7 @@
 _ft_isprint:
 	push rbp
 	lea rbp, [rsp]
-	cmp edi, 0x19
+	cmp edi, 0x1f
 	jle E2
 	cmp edi, 0x7f
 	jae E2

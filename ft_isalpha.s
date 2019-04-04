@@ -11,6 +11,7 @@ L1:
 	cmp edi, 0x5a
 	jle E1
 L2:
+	;;  OR ZONE
 	cmp edi, 0x60
 	jle E2
 L3:

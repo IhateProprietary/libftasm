@@ -4,8 +4,8 @@
 _ft_isdigit:
 	push rbp
 	lea rbp, [rsp]
-	cmp edi, 0x29
-	jle E2
+	cmp edi, 0x30
+	jl E2
 L1:
 	cmp edi, 0x39
 	ja E2
