@@ -6,7 +6,7 @@
 #    By: jye <marvin@42.fr>                         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/04/04 14:58:08 by jye               #+#    #+#              #
-#    Updated: 2019/04/04 15:21:29 by jye              ###   ########.fr        #
+#    Updated: 2019/04/10 16:39:16 by jye              ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -30,7 +30,8 @@ ASMSOURCE = ft_bzero.s \
 			ft_strdup.s \
 			ft_strlen.s \
 			ft_tolower.s \
-			ft_toupper.s
+			ft_toupper.s \
+			ft_strcat.s
 
 TARGET = libfts.a
 

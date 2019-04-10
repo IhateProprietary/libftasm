@@ -20,9 +20,9 @@ class CTYPE(Enum):
     SIZE_T = "size_t"
 
 class DEF(Enum):
-    MEMORY = "-D__MEMORY__"
-    STRING = "-D__STRING__"
-    RETURN = "-D__RETURN__"
+    MEMORY = "-D__TEST_MEMORY__"
+    STRING = "-D__TEST_STRING__"
+    RETURN = "-D__TEST_RETURN__"
     PTR = "-D__PTR__"
     ORIGINAL = "-D__ORIGINAL__"
 
@@ -124,6 +124,15 @@ FUNCTION = {
         "cdefines": [DEF.MEMORY, DEF.ORIGINAL],
         "test_type": 0
     },
+    "strcat": {
+        "type": [CTYPE.CHAR, 1],
+        "argv": [
+            [CTYPE.CHAR, ARGV.DST, 1],
+            [CTYPE.CHAR, ARGV.SRC, 1]
+        ],
+        "cdefines": [DEF.STRING, DEF.ORIGINAL],
+        "test_type": 0
+    },
     "strchr": {
         "type": [CTYPE.CHAR, 1],
         "argv": [
@@ -212,7 +221,7 @@ int     main(int ac, char **av)
     char *__dst = malloc(bufsize);
     char __cmp[] = "{buffer2}";
     int fd = open("/dev/urandom", O_RDONLY);
-#ifdef __STRING__
+#ifdef __TEST_STRING__
     __cmp[{rdm}] = 0;
     src[{rdm}] = 0;
 #endif
@@ -220,27 +229,38 @@ int     main(int ac, char **av)
     assert(__dst != (char *)0);
     assert(fd != -1);
     read(fd, __dst, bufsize);
+#ifdef __TEST_STRING__
+    if({rdm2})
+        memcpy(__dst, src, {rdm2});
+    __dst[{rdm2}] = 0;
+#endif
 
 #ifdef __ORIGINAL__
     char *__odst = malloc(bufsize);
 
     assert(__odst != (char *)0);
     read(fd, __odst, bufsize);
-# if defined(__RETURN__) || defined(__PTR__)
+
+# ifdef __TEST_STRING__
+    if({rdm2})
+        memcpy(__odst, src, {rdm2});
+    __odst[{rdm2}] = 0;
+# endif
+
+# if defined(__TEST_RETURN__) || defined(__PTR__)
     {_type} {ptr}oret = {func}({oarg});
 # else
     {func}({oarg});
 # endif
 #endif
 
-#if defined(__RETURN__) || defined(__PTR__)
+#if defined(__TEST_RETURN__) || defined(__PTR__)
     {_type} {ptr}ret = ft_({arg});
 #else
     ft_({arg});
 #endif
 
-
-#if defined(__ORIGINAL__) && defined(__MEMORY__)
+#if defined(__ORIGINAL__) && defined(__TEST_MEMORY__)
 # ifdef __PTR__
     assert(!memcmp(ret, src, bufsize));
 # else
@@ -248,7 +268,7 @@ int     main(int ac, char **av)
 # endif
 #endif
 
-#if defined(__ORIGINAL__) && defined(__STRING__)
+#if defined(__ORIGINAL__) && defined(__TEST_STRING__)
 # ifdef __PTR__
     assert(!strcmp(ret, src));
 # else
@@ -256,7 +276,7 @@ int     main(int ac, char **av)
 # endif
 #endif
 
-#ifdef __RETURN__
+#ifdef __TEST_RETURN__
     assert(ret == oret);
 #endif
     return (0);
@@ -302,6 +322,7 @@ if __name__ == "__main__":
             filename = folder+prefix+key+suffix+str(_)
             ## if string, put a 0 somewhere, assuming there isn't one already in /dev/urandom
             _cut = random.randrange(0, sizebuf, 8)
+            _cut2 = random.randrange(0, sizebuf - _cut, 8);
             z = os.open(filename + ".c", os.O_TRUNC | os.O_CREAT | os.O_WRONLY, 0o644)
             ## if testing with an int
             rchar=random.randrange(1, 127)
@@ -314,11 +335,12 @@ if __name__ == "__main__":
                 arg=", ".join([x[1] for x in argv]).format(dst = "__dst", char = rchar),
                 oarg=", ".join([x[1] for x in argv]).format(dst = "__odst", char = rchar),
                 rdm = _cut,
+                rdm2 = _cut2,
                 buffer1=buf1,
                 buffer2=buf2,
             ).encode("UTF-8"))
             os.close(z)
-            cmd = "gcc {filename}.c -o {filename} {DEFINES} -L. -lfts".format(filename=filename, DEFINES=" ".join([x.value for x in value["cdefines"]]))
+            cmd = "gcc {filename}.c -o {filename} {DEFINES} -g3 -L. -lfts".format(filename=filename, DEFINES=" ".join([x.value for x in value["cdefines"]]))
             cmd = shlex.split(cmd)
             subprocess.run(cmd)
             ## testing against original
